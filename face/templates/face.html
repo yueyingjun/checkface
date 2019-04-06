@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body{
+            width:100%;height:100%;
+            padding:0;margin: 0;
+            background: url("/static/image/face.png") no-repeat top center /cover;
+        }
+
+        .photo{
+            width:200px;height:250px;
+            border:1px solid #000;
+            position: absolute;
+            left:0;right:0;margin: auto;
+            top:125px;
+        }
+        video{
+            width:100%;height:100%;
+            position: absolute;
+            left:0;top:0;
+        }
+        canvas{
+            width:100%;height:100%;
+            position: absolute;
+            left:0;top:0;
+        }
+
+    </style>
+</head>
+<body>
+  <div class="photo">
+      <video src="" autoplay></video>
+      <canvas></canvas>
+  </div>
+
+  <script>
+
+
+      function speak(text, callback) {
+
+
+            var speach = window.speechSynthesis
+            var speachset = new SpeechSynthesisUtterance()
+            speachset.onend=function (ev) {
+                if(callback){
+                    callback()
+                }
+            }
+            speachset.text = text
+
+            speach.speak(speachset)
+        }
+
+        speak("请将人脸对准摄像头",function () {
+
+
+      var canvas=document.querySelector("canvas");
+
+      var video=document.querySelector("video")
+      var width=video.offsetWidth;
+      var height=video.offsetHeight;
+      canvas.width=width
+      canvas.height=height
+      navigator.mediaDevices.getUserMedia({
+          video:{
+              width:200,
+              height:250
+          }
+      }).then(function (value) {
+          video.srcObject=value
+          var flag=true;
+          video.onprogress=function (ev) {
+              if(!flag) {
+                  return
+              }
+              flag=false;
+              var cobj=canvas.getContext("2d")
+              cobj.drawImage(video,0,0)
+              var datas=canvas.toDataURL("image/jpeg",.7).substr(23)
+
+              fetch("/photo",{
+                  method:"post",
+                  headers:{
+                      "content-type":"application/x-www-form-urlencoded"
+                  },
+                  body:"url="+datas+"&name="+localStorage.name
+              }).then(function (value2) {
+                  return value2.json()
+              }).then((e)=>{
+
+                if (e.error_code){
+                    flag=true;
+                }else{
+                   speak("人脸上传成功",function () {
+                       location.href="/success"
+                   }) 
+                }
+                
+              })
+
+
+          }
+      })
+            })
+  </script>
+
+</body>
+</html>

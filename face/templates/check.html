@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en" rem="750">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/u-reset.min.css">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background: url("/static/image/face.png") no-repeat top center /cover;
+        }
+
+        .camera {
+            width: 4rem;
+            height: 5rem;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 2.5rem;
+            margin: auto;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="camera">
+    <canvas>
+
+    </canvas>
+    <video src="" autoplay>
+
+    </video>
+
+</div>
+
+<script>
+    function speak(text, callback) {
+        var speech = window.speechSynthesis;
+        var speechset = new SpeechSynthesisUtterance()
+        speechset.onend = function (ev) {
+            if (callback) {
+                callback()
+            }
+        }
+        speechset.text = text
+        speech.speak(speechset)
+    }
+
+    var video = document.querySelector("video")
+    var width = video.offsetWidth
+    var height = video.offsetHeight
+    var canvas = document.querySelector("canvas");
+    canvas.width = width
+    canvas.height = height
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            width: width,
+            height: height
+        }
+    }).then(function (value) {
+        video.srcObject = value
+        cobj = canvas.getContext("2d")
+
+        var flag = true
+        video.onprogress = function (ev) {
+            if (!flag) {
+                return;
+            }
+            flag = false
+            cobj.drawImage(video, 0, 0)
+            var base = (canvas.toDataURL("image/jpeg", .7).substr(23))
+            fetch("/check", {
+                method: "post",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded"
+                },
+                body: "url=" + base + "&name=" + "岳英俊"
+            }).then(function (value2) {
+
+                return (value2.json())
+            }).then((e) => {
+                if (e['error_code']) {
+                    speak("没有检测到人脸",function () {
+                        flag=true
+                    })
+                } else {
+                    console.log(e);
+                    localStorage.name=e.result[0]["user_info"]
+                    location.href="/diff"
+                }
+
+            })
+        }
+
+    })
+</script>
+</body>
+</html>
