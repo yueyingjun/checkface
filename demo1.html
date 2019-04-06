@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body{
+            width:100%;height:100%;
+            padding:0;margin: 0;
+        }
+        .box{
+            width:70%;height:50%;
+            border:1px solid #000;
+            position: absolute;
+            left:0;top:0;right:0;bottom: 0;
+            margin: auto;
+        }
+        .box div{
+            float:left;
+            width:12.5%;height:100%;
+            border:1px solid #000;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .box div:nth-child(2n){
+            background: #aaa;
+        }
+    </style>
+    <script>
+        window.onload=function (ev) {
+
+          var datas={
+              49:{
+                  div:0,audio:400+400*(1/8)
+              },
+               50:{
+                  div:1,audio:400+400*(2/8)
+              },
+               51:{
+                  div:2,audio:400+400*(3/8)
+              },
+              52:{
+                  div:3,audio:400+400*(4/8)
+              },
+              53:{
+                  div:4,audio:400+400*(5/8)
+              },
+              54:{
+                  div:5,audio:400+400*(6/8)
+              },
+              55:{
+                  div:6,audio:400+400*(7/8)
+              },
+              56:{
+                  div:7,audio:400+400*(8/8)
+              }
+          }
+
+          var keys=document.querySelectorAll(".box div")
+
+           var audio=new AudioContext();
+           var os
+
+          document.onkeydown=function (ev2) {
+              var key=ev2.keyCode
+              os=audio.createOscillator()
+              var aa=audio.createAnalyser()
+              var gain=audio.createGain()
+
+              os.connect(aa)
+              os.connect(gain)
+
+              os.connect(audio.destination)
+
+              os.frequency.setValueAtTime(datas[key]["audio"],audio.currentTime)
+              os.start(audio.currentTime)
+
+              keys[datas[key]["div"]].style.boxShadow="0 0 10px #000 inset"
+          }
+
+          document.onkeyup=function (ev2) {
+
+              var key=ev2.keyCode
+
+              os.stop(audio.currentTime)
+              keys[datas[key]["div"]].style.boxShadow="none"
+          }
+        }
+
+    </script>
+</head>
+<body>
+  <div class="box">
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+      <div>8</div>
+  </div>
+</body>
+</html>
