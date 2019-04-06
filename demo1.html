@@ -63,8 +63,12 @@
 
            var audio=new AudioContext();
            var os
-
+           var flag=true;
           document.onkeydown=function (ev2) {
+              if(!flag){
+                  return
+              }
+              flag=false
               var key=ev2.keyCode
               os=audio.createOscillator()
               var aa=audio.createAnalyser()
@@ -72,9 +76,7 @@
 
               os.connect(aa)
               os.connect(gain)
-
               os.connect(audio.destination)
-
               os.frequency.setValueAtTime(datas[key]["audio"],audio.currentTime)
               os.start(audio.currentTime)
 
@@ -82,7 +84,7 @@
           }
 
           document.onkeyup=function (ev2) {
-
+              flag=true;
               var key=ev2.keyCode
 
               os.stop(audio.currentTime)
